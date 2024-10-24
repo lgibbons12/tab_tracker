@@ -1,11 +1,16 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 
+#initialize flask app
 app = Flask(__name__)
 
+#allow cross-origin requests to recieve data from the extension
+CORS(app)
 
 
 @app.route('/update_data', methods=['POST'])
 def update_data():
+    #recieve posted data and print to screen
     data = request.json
     if data:
         print(f"Recieved data: {data}")
