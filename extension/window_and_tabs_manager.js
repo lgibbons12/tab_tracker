@@ -313,6 +313,40 @@ chrome.tabs.onUpdated.addListener(function (tabId, props) {
   refreshTab(tabId);
 });
 
+//code for testing api sending
+
+// Function to send tab data to the Python API
+function sendDataToPythonAPI(tabData) {
+  fetch('http://127.0.0.1:5000/update_data', {  // Replace with your actual API endpoint
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(tabData)
+  })
+  .then(response => response.json())
+  .then(data => {
+    console.log('Response from Python API:', data);
+  })
+  .catch((error) => {
+    console.error('Error:', error);
+  });
+}
+
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  if (changeInfo.status === "complete") {
+    const tabData = {
+      url: tab.url,
+      title: tab.title,
+      tabId: tabId
+    };
+
+    console.log(tabData);
+    sendDataToPythonAPI(tabData);
+
+  }
+});
+
 chrome.tabs.onDetached.addListener(function (tabId, props) {
   appendToLog(
     'tabs.onDetached -- window: ' +
