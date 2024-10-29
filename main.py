@@ -12,6 +12,9 @@ CORS(app)
 def update_data():
     #recieve posted data and print to screen
     data = request.json
+
+    type_of_update = request.headers.get('Type')
+    print(f"Type of update: {type_of_update}")
     if data:
         print(f"Recieved data: {data}")
         return jsonify({"message": "Data recieved successfully"}), 200

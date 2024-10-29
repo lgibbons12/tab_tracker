@@ -265,6 +265,16 @@ chrome.tabs.onCreated.addListener(function (tab) {
       tab.url
   );
   loadWindowList();
+
+  const tab_data = {
+    win_id: tab.windowId,
+    id: tab.id,
+    title: tab.title,
+    url: tab.url,
+    timestamp: getTimestamp()
+  }
+
+  //sendDataToPythonAPI(tab_data, "tab_created");
 });
 
 chrome.tabs.onAttached.addListener(function (tabId, props) {
@@ -316,11 +326,12 @@ chrome.tabs.onUpdated.addListener(function (tabId, props) {
 //code for testing api sending
 
 // Function to send tab data to the Python API
-function sendDataToPythonAPI(tabData) {
+function sendDataToPythonAPI(tabData, typeOfUpdate) {
   fetch('http://127.0.0.1:5000/update_data', {  // Replace with your actual API endpoint
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      'Type': typeOfUpdate
     },
     body: JSON.stringify(tabData)
   })
@@ -333,19 +344,62 @@ function sendDataToPythonAPI(tabData) {
   });
 }
 
+function getTimestamp() {
+  const date = new Date();
+  const formatted = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
+  return formatted;
+}
+
+
+
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.status === "complete") {
+    // const tabData = {
+    //   url: tab.url,
+    //   title: tab.title,
+    //   tabId: tabId
+    // };
+
     const tabData = {
-      url: tab.url,
+      win_id: tab.windowId,
+      id: tab.id,
       title: tab.title,
-      tabId: tabId
-    };
+      url: tab.url,
+      timestamp: getTimestamp()
+    }
 
     console.log(tabData);
-    sendDataToPythonAPI(tabData);
+    sendDataToPythonAPI(tabData, "tab updated");
 
   }
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 chrome.tabs.onDetached.addListener(function (tabId, props) {
   appendToLog(
