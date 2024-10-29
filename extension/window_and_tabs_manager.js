@@ -414,11 +414,30 @@ chrome.tabs.onDetached.addListener(function (tabId, props) {
 });
 
 chrome.tabs.onActivated.addListener(function (props) {
-  appendToLog(
-    'tabs.onActivated -- window: ' + props.windowId + ' tab: ' + props.tabId
-  );
+  appendToLog('tabs.onActivated -- window: ' + props.windowId + ' tab: ' + props.tabId);
   loadWindowList();
+
+  // Fetch the full tab information
+  chrome.tabs.get(props.tabId, function (tab) {
+    if (chrome.runtime.lastError) {
+      console.error(chrome.runtime.lastError.message);
+      return;
+    }
+
+    // Prepare tab data to send to the API
+    const tab_data = {
+      win_id: props.windowId,
+      id: tab.id,
+      title: tab.title,
+      url: tab.url,
+      timestamp: getTimestamp()
+    };
+
+    // Send tab data to the Python API
+    sendDataToPythonAPI(tab_data, "tab_activated");
+  });
 });
+
 
 chrome.tabs.onRemoved.addListener(function (tabId) {
   appendToLog('tabs.onRemoved -- tab: ' + tabId);
